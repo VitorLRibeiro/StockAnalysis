@@ -1,0 +1,149 @@
+Sub StockAnalysis()
+
+'Loop through multiple sheets
+'---------------------------
+
+Dim ws As Worksheet
+
+For Each ws In Worksheets
+
+'Determine all the variables
+'---------------------------
+
+Dim ticker As String
+
+Dim volume As Double
+volume = 0
+
+Dim YrBegin As Double
+YrBegin = 0
+
+Dim YrEnd As Double
+YrEnd = 0
+
+Dim YrChange As Double
+YrChange = 0
+
+Dim PcChange As Double
+PcChange = 0
+
+Dim rowBegin As Long
+rowBegin = 2
+
+Dim lastrow As Long
+lastrow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+'---------------------------
+'End of variables
+
+'Name columns
+'---------------------------
+
+        ws.Cells(1, 11).Value = "Ticker"
+        ws.Cells(1, 12).Value = "Yearly Change"
+        ws.Cells(1, 13).Value = "Percent Change"
+        ws.Cells(1, 14).Value = "Total Stock Volume"
+        
+'---------------------------
+'End name columns
+
+'Define Summary Table
+'---------------------------
+
+  Dim Summary_Table_Row As Integer
+  Summary_Table_Row = 2
+ 
+'---------------------------
+  
+'Grab first price for each ticker
+'---------------------------
+  For I = rowBegin To lastrow
+            
+            If ws.Cells(I, 1).Value <> ws.Cells(I - 1, 1).Value Then
+
+                YrBegin = ws.Cells(I, 3).Value
+
+            End If
+'-----------------------------------
+            
+'Total volume and Placement
+'-----------------------------------
+            volume = volume + ws.Cells(I, 7)
+               ws.Range("N" & Summary_Table_Row).Value = volume
+
+'-----------------------------------
+'End of Total Volume
+          
+'Building Summary Table
+'-----------------------------------
+
+            If ws.Cells(I, 1).Value <> ws.Cells(I + 1, 1).Value Then
+            
+'Unique Ticker
+'-----------------------------------
+            ticker = ws.Cells(I, 1).Value
+            
+            ws.Range("K" & Summary_Table_Row).Value = ticker
+'-----------------------------------
+
+'YrChange and PcChange Calculation, Placement, and Formatting
+'-----------------------------------
+
+                YrEnd = ws.Cells(I, 6).Value
+                YrChange = YrEnd - YrBegin
+               ws.Range("L" & Summary_Table_Row).Value = YrChange
+               
+        
+                If YrBegin = 0 And YrEnd = 0 Then
+                    percent_change = 0
+                    ws.Cells(rowBegin, 13).Value = PcChange
+                    ws.Cells(rowBegin, 13).NumberFormat = "0.00%"
+                ElseIf YrBegin = 0 Then
+                    Dim PcChange_NA As String
+                    PcChange_NA = "New Stock"
+                    ws.Cells(rowBegin, 13).Value = percent_change
+                Else
+                    PcChange = YrChange / YrBegin
+                    ws.Cells(rowBegin, 13).Value = PcChange
+                    ws.Cells(rowBegin, 13).NumberFormat = "0.00%"
+                End If
+
+        
+               ws.Range("M" & Summary_Table_Row).Value = PcChange
+               ws.Range("M" & Summary_Table_Row).NumberFormat = "0.00%"
+               
+
+'Formatting ColorIndex for YrChange Cells
+'-----------------------------------
+                If YrChange >= 0 Then
+                   ws.Range("L" & Summary_Table_Row).Interior.ColorIndex = 4
+                Else
+                    ws.Range("L" & Summary_Table_Row).Interior.ColorIndex = 3
+                End If
+                    
+'-----------------------------------
+
+'Next place in Summary Table
+                Summary_Table_Row = Summary_Table_Row + 1
+'-----------------------------------
+
+'Reset all values to 0 for next ticker
+'-----------------------------------
+            
+                volume = 0
+                YrBegin = 0
+                YrEnd = 0
+                YrChange = 0
+                PcChange = 0
+'-----------------------------------
+                
+            End If
+
+        Next I
+
+  Next ws
+
+End Sub
+
+
+
